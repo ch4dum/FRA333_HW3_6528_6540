@@ -1,6 +1,6 @@
 # file สำหรับตรวจคำตอบ
 # ในกรณีที่มีการสร้าง function อื่น ๆ ให้ระบุว่า input-output คืออะไรด้วย
-from FRA333_HW3_28_40 import endEffectorJacobianHW3, checkSingularityHW3, computeEffortHW3
+from FRA333_HW3_6528_6540.FRA333_HW3_6528_6540 import endEffectorJacobianHW3, checkSingularityHW3, computeEffortHW3
 import numpy as np
 import roboticstoolbox as rtb
 from spatialmath import SE3
