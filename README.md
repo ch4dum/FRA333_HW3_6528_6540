@@ -279,6 +279,20 @@ w = np.array([1, 1, 1, 1, 1, 1])
 
 ### 3. Checking Joint Torque
 
+Input ของ Checking Singularity จะใช้เป็น `q_init` และ `w`
+
+```python
+computeEffortRTB(q_init, w)
+```
+
+โดยสามารถปรับค่าได้ตามที่แจ้งไว้ใน Setup and Configuration
+
+```python
+q_singulality = [0, -np.pi/2, -0.1]
+q_init = [0, 0, 0]               # Input ของ Checking Joint Torque ที่สามารถปรับค่าได้
+w = np.array([1, 1, 1, 1, 1, 1]) # Input ของ Checking Joint Torque ที่สามารถปรับค่าได้
+```
+
 **Checking Joint Torque Output**
 
 ![image](https://github.com/user-attachments/assets/d0ceae6e-9178-453f-bc60-905751c2fc0c)
