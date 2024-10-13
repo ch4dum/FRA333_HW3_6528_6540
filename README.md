@@ -142,3 +142,66 @@ def computeEffortHW3(q:list[float], w:list[float])->list[float]:
 
     return tau
 ```
+## Checking Answer
+### Setup and Configuration
+เริ่มประกาศ หรือกำหนดตัวแปรสำหรับการทำโมเดลของหุ่นยนต์ RRR
+
+```python
+d_1 = 0.0892
+a_2 = 0.425
+a_3 = 0.39243
+d_4 = 0.109
+d_5 = 0.093
+d_6 = 0.082
+
+q_singulality = [0, -np.pi/2, -0.1]
+q_init = [0, 0, 0] 
+w = np.array([1, 1, 1, 1, 1, 1]) 
+```
+
+โดยจะมีตัวแปร `q_singulality`, `q_init` และ `w` ที่เป็นตัวแปรที่สามารถปรับเปลี่ยนค่าได้สำหรับการ Check คำตอบ
+
+ทำการ**สร้างโมเดลของหุ่นยนต์** RRR โดยใช้ Robotic Toolbox for Python ร่วมกับ Modified Denavit-Hartenberg (MDH) parameters
+
+```python
+robot = rtb.DHRobot(
+    [
+        rtb.RevoluteMDH(alpha=0, a=0, d=d_1, offset=np.pi), 
+        rtb.RevoluteMDH(alpha=np.pi/2, a=0, d=0, offset=0),
+        rtb.RevoluteMDH(alpha=0, a=-a_2,  d=0, offset=0)
+    ], 
+    tool = SE3(
+    [
+        [0, 0, -1, -(a_3 + d_6)],
+        [0, 1, 0, -d_5],
+        [1, 0, 0, d_4],
+        [0, 0, 0, 1]
+    ]),
+    name = "3DOF_Robot")
+```
+### 1. Checking Jacobian Matrix
+
+ใช้งาน Function `jacob0` ที่เป็น Function ใน Robotic Toolbox เพื่อใช้ในการคำนวณ Jacobian matrix โดยอิงจากจุดเริ่มต้นของหุ่นยนต์ (Base frame หรือ Frame 0) ซึ่งจะนำค่าที่ได้เปรียบเทียบกับ Function การหาคำตอบจากการคำนวณ (`endEffectorJacobianHW3`)
+
+```python
+def endEffectorJacobianRTB(q:list[float])->list[float]:
+    # คำนวณ Jacobian อิงจาก Base
+    jacob_rtb = robot.jacob0(q)
+    jacob = endEffectorJacobianHW3(q_init)
+    # หา Error
+    diff = jacob_rtb - jacob
+    # กำหนด threshold
+    threshold = 1e-10
+    # แสดงผล และเปรียบเทียบผลลัพธ์
+    print("-------------------Jacobian Check-------------------")
+    print(f"Jacobian HW3: \n {jacob}")
+    print(f"Jacobian Robotic toolbox: \n {jacob_rtb}")
+    if np.linalg.norm(diff) < threshold:
+        diff = np.where(np.abs(diff) < threshold, 0.0, diff)
+        print(f"Error: \n {diff}")
+        print("Answer: CORRECT\n")
+    else:
+        print(f"Error: \n {diff}\n")
+        print("Answer: INCORRECT\n")
+    return jacob_rtb
+```
