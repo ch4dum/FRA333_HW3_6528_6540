@@ -312,7 +312,7 @@ def computeEffortRTB(q: list[float],w:list[float])->list[float]:
     return tau_rtb
 ```
 
-Input ของ Checking Singularity จะใช้เป็น `q_init` และ `w`
+Input ของ Checking Joint Torque จะใช้เป็น `q_init` และ `w`
 
 ```python
 computeEffortRTB(q_init, w)
