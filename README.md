@@ -159,7 +159,7 @@ q_init = [0, 0, 0]
 w = np.array([1, 1, 1, 1, 1, 1]) 
 ```
 
-โดยจะมีตัวแปร `q_singulality`, `q_init` และ `w` ที่เป็นตัวแปรที่สามารถปรับเปลี่ยนค่าได้สำหรับการ Check คำตอบ
+โดยจะมีตัวแปร `q_singulality`, `q_init` และ `w` ที่เป็นตัวแปร Input ที่สามารถปรับเปลี่ยนค่าได้สำหรับการ Check คำตอบ
 
 ทำการ**สร้างโมเดลของหุ่นยนต์** RRR โดยใช้ Robotic Toolbox for Python ร่วมกับ Modified Denavit-Hartenberg (MDH) parameters
 
@@ -197,6 +197,7 @@ def endEffectorJacobianRTB(q:list[float])->list[float]:
     print(f"Jacobian HW3: \n {jacob}")
     print(f"Jacobian Robotic toolbox: \n {jacob_rtb}")
     if np.linalg.norm(diff) < threshold:
+        # ถ้า Error น้อยกว่า Threshold จะถือว่า Error เป็น 0 ไปเลย
         diff = np.where(np.abs(diff) < threshold, 0.0, diff)
         print(f"Error: \n {diff}")
         print("Answer: CORRECT\n")
@@ -205,3 +206,22 @@ def endEffectorJacobianRTB(q:list[float])->list[float]:
         print("Answer: INCORRECT\n")
     return jacob_rtb
 ```
+Input ของ Checking Jacobian Matrix จะใช้เป็น q_init
+
+```python
+endEffectorJacobianRTB(q_init)
+```
+
+โดยสามารถปรับค่าได้ตามที่แจ้งไว้ใน Setup and Configuration
+
+```python
+q_singulality = [0, -np.pi/2, -0.1]
+q_init = [0, 0, 0] # Input ของ Checking Jacobian Matrix ที่สามารถปรับค่าได้
+w = np.array([1, 1, 1, 1, 1, 1]) 
+```
+
+
+**Checking Jacobian Matrix Output**
+
+![image](https://github.com/user-attachments/assets/6fbb305a-e6ac-4184-bf32-1506bf242d2e)
+
