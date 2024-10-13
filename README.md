@@ -181,7 +181,7 @@ robot = rtb.DHRobot(
 ```
 ### 1. Checking Jacobian Matrix
 
-ใช้งาน Function `jacob0` ที่เป็น Function ใน Robotic Toolbox เพื่อใช้ในการคำนวณ Jacobian matrix โดยอิงจากจุดเริ่มต้นของหุ่นยนต์ (Base frame หรือ Frame 0) ซึ่งจะนำค่าที่ได้เปรียบเทียบกับ Function การหาคำตอบจากการคำนวณ (`endEffectorJacobianHW3`)
+ใช้งาน Function `jacob0` ที่เป็น Function ใน Robotic Toolbox เพื่อใช้ในการคำนวณ Jacobian matrix โดยอิงจากจุดเริ่มต้นของหุ่นยนต์ (Base frame หรือ Frame 0) ซึ่งจะนำค่าที่ได้เปรียบเทียบกับ Function การหาคำตอบจากการคำนวณ (`endEffectorJacobianHW3`) ตาม Code ด้านล่าง
 
 ```python
 def endEffectorJacobianRTB(q:list[float])->list[float]:
@@ -206,7 +206,7 @@ def endEffectorJacobianRTB(q:list[float])->list[float]:
         print("Answer: INCORRECT\n")
     return jacob_rtb
 ```
-Input ของ Checking Jacobian Matrix จะใช้เป็น q_init
+Input ของ Checking Jacobian Matrix จะใช้เป็น `q_init`
 
 ```python
 endEffectorJacobianRTB(q_init)
@@ -225,3 +225,60 @@ w = np.array([1, 1, 1, 1, 1, 1])
 
 ![image](https://github.com/user-attachments/assets/6fbb305a-e6ac-4184-bf32-1506bf242d2e)
 
+### 2. Checking Singularity
+ใช้งาน Function `jacob0` ที่เป็น Function ใน Robotic Toolbox เพื่อใช้ในการคำนวณ Jacobian matrix โดยอิงจากจุดเริ่มต้นของหุ่นยนต์ (Base frame หรือ Frame 0) เหมือนเดิม และนำค่าที่ได้ไปคำนวณหา Determinant เพื่อเปรียบเทียบกับ Epsilon ($\epsilon$) และเปรียบเทียบผลลัพธ์กับการคำนวณ Jacobian ด้วยวิธีการคำนวณปกติ (`checkSingularityHW3`) ตาม Code ด้านล่าง
+
+```python
+def checksingularityRTB(q:list[float])->bool:
+    epsilon = 0.001  # ค่าเกณฑ์สำหรับการตรวจสอบ Singular
+    
+    # คำนวณ Jacobian ใช้ Robotic Toolbox
+    J = robot.jacob0(q)  # Jacobian at the base frame
+    
+    # ตรวจสอบขนาดของ Jacobian
+    if J.shape[0] < 3 or J.shape[1] < 3:
+        raise ValueError("Jacobian must have at least shape (3, 3) for determinant calculation.")
+    
+    # เลือก Jacobian ที่ต้องการคำนวณ determinant (เลือกแค่แถวแรก)
+    J_star = J[:3, :]  # หรือ J[:, :3] ขึ้นอยู่กับว่าอยากเลือกแถวหรือคอลัมน์
+    
+    # คำนวณ Determinant ของ Jacobian ที่เลือก
+    det_J = np.linalg.det(J_star)
+    # แสดงผล และเปรียบเทียบผลลัพธ์
+    print("------------------Singularity Check-----------------")
+    print("Singularity Check HW3:")
+    checkSingularityHW3(q)
+    print("Singularity Check Robotic toolbox:")
+    # ตรวจสอบว่าค่า Determinant น้อยกว่า epsilon หรือไม่
+    if abs(det_J) < epsilon:
+        flag = 1  # อยู่ในสภาวะ Singular
+        print("- Robot IS IN SINGULARITY\n")
+    else:
+        flag = 0  # อยู่ในสภาวะปกติ
+        print("- Robot is NOT in singularity\n")
+
+    return flag
+```
+
+Input ของ Checking Singularity จะใช้เป็น `q_singulality`
+```python
+checksingularityRTB(q_singulality)
+```
+
+โดยสามารถปรับค่าได้ตามที่แจ้งไว้ใน Setup and Configuration
+
+```python
+q_singulality = [0, -np.pi/2, -0.1] # Input ของ Checking Singularity ที่สามารถปรับค่าได้
+q_init = [0, 0, 0]
+w = np.array([1, 1, 1, 1, 1, 1]) 
+```
+
+**Checking Singularity Output**
+
+![image](https://github.com/user-attachments/assets/19971cc5-01b4-4fb8-a7ad-9a2521dc5d33)
+
+### 3. Checking Joint Torque
+
+**Checking Joint Torque Output**
+
+![image](https://github.com/user-attachments/assets/d0ceae6e-9178-453f-bc60-905751c2fc0c)
