@@ -46,6 +46,25 @@ J_\omega
 \end{bmatrix}
 $$
 
+จากวิธีการคำนวณข้างต้นจะทำให้สามารถสร้าง Function `endEffectorJacobianHW3` ได้ดัง Code ด้านล่าง
+```python
+def endEffectorJacobianHW3(q:list[float])->list[float]:
+    # เรียกใช้ FKHW3 จาก HW3_utils.py
+    R, P, R_e, p_e = FKHW3(q)
+
+    # ขนาดของ Jacobian
+    J_v = np.zeros((3, 3))  # Jacobian เชิงเส้น
+    J_omega = np.zeros((3, 3))  # Jacobian เชิงมุม
+    
+    # คำนวณ J_v และ J_omega
+    for i in range(3):
+        J_v[:, i] = np.cross(R[:, :, i][:, 2], (p_e - P[:, i]))
+        J_omega[:, i] = R[:, :, i][:, 2]
+
+    J = np.vstack((J_v, J_omega))
+    return J
+```
+
 ### 2. การตรวจสอบ Singularity
 ในการหาคำตอบของข้อที่ 2 เราต้องการตรวจสอบว่าหุ่นยนต์อยู่ในของตำแหน่ง Singularity หรือไม่ โดยมีขั้นตอนการคำนวณดังนี้:
 
@@ -62,6 +81,35 @@ $$
 - $|det(J_v)| < \epsilon$ แสดงว่าหุ่นยนต์อยู่ในสถานะ Singular
 - $|det(J_v)| > \epsilon$ แสดงว่าหุ่นยนต์ไม่ได้อยู่ในสถานะ Singular
 
+จากวิธีการคำนวณและประเมิณข้างต้นจะทำให้สามารถสร้าง Function `checkSingularityHW3` ได้ดัง Code ด้านล่าง
+```python
+def checkSingularityHW3(q:list[float])->bool:
+    epsilon = 0.001  # ค่าเกณฑ์สำหรับการตรวจสอบ Singular
+
+    # คำนวณ Jacobian
+    J = endEffectorJacobianHW3(q)
+
+    # ตรวจสอบขนาดของ Jacobian
+    if J.shape[0] < 3 or J.shape[1] < 3:
+        raise ValueError("Jacobian must have at least shape (3, 3) for determinant calculation.")
+
+    # เลือก Jacobian ที่ต้องการคำนวณ determinant
+    J_star = J[:3, :]  # หรือ J[:, :3] ขึ้นอยู่กับความหมายของจาโคเบียนในกรณีนี้
+
+    # คำนวณ Determinant ของ Jacobian ที่เลือก
+    det_J = np.linalg.det(J_star)
+
+    # ตรวจสอบว่าค่า Determinant น้อยกว่า epsilon หรือไม่
+    if abs(det_J) < epsilon:
+        flag = 1  # อยู่ในสภาวะ Singular
+        print("- Robot IS IN SINGULARITY")
+    else:
+        flag = 0  # อยู่ในสภาวะปกติ
+        print("- Robot is NOT in singularity")
+
+    return flag
+```
+
 ### 3. การคำนวณแรงบิดที่ข้อต่อ (Joint Torque)
 ในการหาคำตอบของข้อที่ 3 เป็นการคำนวณแรงบิดที่ข้อต่อของหุ่นยนต์ ซึ่งเกิดขึ้นเมื่อมีแรงกระทำที่จุดสิ้นสุดของหุ่นยนต์ (End-Effector) สามารถคำนวณได้โดยใช้ Jacobian Matrix ร่วมกับแรงที่กระทำหรือที่เรียกว่า Wrench ซึ่งเป็นแรงและโมเมนต์ที่กระทำต่อ End-Effector โดยมีวิธีการคำนวณดังนี้:
 
@@ -75,3 +123,22 @@ $$
 - $\tau$ คือเวกเตอร์ของแรงบิดที่ข้อต่อ
 - $J^T$ คือ Jacobian Matrix ที่ผ่านการ Transpose (การสลับแถวเป็นคอลัมน์)
 - $w$ คือ Wrench หรือแรงที่กระทำที่จุดสิ้นสุดของหุ่นยนต์
+
+จากวิธีการคำนวณข้างต้นจะทำให้สามารถสร้าง Function `computeEffortHW3` ได้ดัง Code ด้านล่าง
+```python
+def computeEffortHW3(q:list[float], w:list[float])->list[float]:
+    # คำนวณ Jacobian
+    J = endEffectorJacobianHW3(q)
+
+    # แยกค่า force และ moment จาก wrench w
+    f = w[:3]  # แรง (force)
+    n = w[3:]  # โมเมนต์ (moment)
+
+    # สร้าง wrench เวกเตอร์รวม (force + moment)
+    wrench = np.concatenate((f, n))
+
+    # คำนวณ effort ของแต่ละข้อต่อ
+    tau = np.dot(-J.T, wrench)
+
+    return tau
+```
