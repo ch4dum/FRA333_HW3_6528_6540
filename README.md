@@ -143,7 +143,7 @@ def computeEffortHW3(q:list[float], w:list[float])->list[float]:
     return tau
 ```
 ## Checking Answer
-### Setup and Configuration
+### 0. Setup and Configuration
 เริ่มประกาศ หรือกำหนดตัวแปรสำหรับการทำโมเดลของหุ่นยนต์ RRR
 
 ```python
@@ -278,6 +278,33 @@ w = np.array([1, 1, 1, 1, 1, 1])
 ![image](https://github.com/user-attachments/assets/19971cc5-01b4-4fb8-a7ad-9a2521dc5d33)
 
 ### 3. Checking Joint Torque
+ใช้งาน Funtion `pay` ใน Robotic Toolbox ที่ใช้สำหรับการคำนวณแรงบิด หรือแรงที่ข้อต่อที่เกิดจาก payload wrench (แรงและโมเมนต์ที่กระทำต่อปลายหุ่นยนต์หรือ end-effector) โดยใช้ Jacobian matrix ของหุ่นยนต์ ซึ่ง Jacobian matrix นั้นเราก็ได้มาจากตัว Function `jacob0` ที่เป็น Function ใน Robotic Toolbox อีกเช่นกัน จากนั้นจะทำการนำผลลัพธ์ที่ได้มาเปรียบเทียบกับ Function ที่ใช้การคำนวณตามปกติ (`computeEffortRTB`) ตาม Code ด้านล่าง
+
+```python
+def computeEffortRTB(q: list[float],w:list[float])->list[float]:
+    # คำนวณ Jacobian
+    J = robot.jacob0(q)
+    # คำนวณ effort
+    tau_rtb = robot.pay(w, J=J, frame=0)
+    tau = computeEffortHW3(q,w)
+    # หา Error
+    diff = tau_rtb - tau
+    # กำหนด threshold
+    threshold = 1e-10
+    # แสดงผล และเปรียบเทียบผลลัพธ์
+    print("--------------------Effort Check--------------------")
+    print(f"Effort for each joint HW3: \n {tau}")
+    print(f"Effort for each joint Robotic toolbox: \n {tau_rtb}")
+    if np.linalg.norm(diff) < threshold:
+        # ถ้า Error น้อยกว่า Threshold จะถือว่า Error เป็น 0 ไปเลย
+        diff = np.where(np.abs(diff) < threshold, 0.0, diff)
+        print(f"Error: \n {diff}")
+        print("Answer: CORRECT\n")
+    else:
+        print(f"Error: \n {diff}\n")
+        print("Answer: INCORRECT\n")
+    return tau_rtb
+```
 
 Input ของ Checking Singularity จะใช้เป็น `q_init` และ `w`
 
