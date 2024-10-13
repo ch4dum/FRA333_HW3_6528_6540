@@ -144,6 +144,12 @@ def computeEffortHW3(q:list[float], w:list[float])->list[float]:
 ```
 ## Checking Answer
 ### 0. Setup and Configuration
+
+การหา DH Parameter
+
+![image](https://github.com/user-attachments/assets/c57a1f77-c234-47eb-abfa-64ec957984d8)
+![image](https://github.com/user-attachments/assets/0d62fe19-c8e7-4b85-b61f-a6115494c9ce)
+
 เริ่มประกาศ หรือกำหนดตัวแปรสำหรับการทำโมเดลของหุ่นยนต์ RRR
 
 ```python
