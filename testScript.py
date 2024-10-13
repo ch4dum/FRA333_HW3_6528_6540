@@ -1,6 +1,6 @@
 # file สำหรับตรวจคำตอบ
 # ในกรณีที่มีการสร้าง function อื่น ๆ ให้ระบุว่า input-output คืออะไรด้วย
-from FRA333_HW3_6528_6540.FRA333_HW3_6528_6540 import endEffectorJacobianHW3, checkSingularityHW3, computeEffortHW3
+from FRA333_HW3_6528_6540 import endEffectorJacobianHW3, checkSingularityHW3, computeEffortHW3
 import numpy as np
 import roboticstoolbox as rtb
 from spatialmath import SE3
@@ -18,6 +18,7 @@ a_3 = 0.39243
 d_4 = 0.109
 d_5 = 0.093
 d_6 = 0.082
+
 q_singulality = [0, -np.pi/2, -0.1]
 q_init = [0, 0, 0] 
 w = np.array([1, 1, 1, 1, 1, 1]) 
@@ -47,10 +48,12 @@ def endEffectorJacobianRTB(q:list[float])->list[float]:
     diff = jacob_rtb - jacob
     # กำหนด threshold
     threshold = 1e-10
+    # แสดงผล และเปรียบเทียบผลลัพธ์
     print("-------------------Jacobian Check-------------------")
     print(f"Jacobian HW3: \n {jacob}")
     print(f"Jacobian Robotic toolbox: \n {jacob_rtb}")
     if np.linalg.norm(diff) < threshold:
+        # ถ้า Error น้อยกว่า Threshold จะถือว่า Error เป็น 0 ไปเลย
         diff = np.where(np.abs(diff) < threshold, 0.0, diff)
         print(f"Error: \n {diff}")
         print("Answer: CORRECT\n")
@@ -75,6 +78,7 @@ def checksingularityRTB(q:list[float])->bool:
     
     # คำนวณ Determinant ของ Jacobian ที่เลือก
     det_J = np.linalg.det(J_star)
+    # แสดงผล และเปรียบเทียบผลลัพธ์
     print("------------------Singularity Check-----------------")
     print("Singularity Check HW3:")
     checkSingularityHW3(q)
@@ -101,10 +105,12 @@ def computeEffortRTB(q: list[float],w:list[float])->list[float]:
     diff = tau_rtb - tau
     # กำหนด threshold
     threshold = 1e-10
+    # แสดงผล และเปรียบเทียบผลลัพธ์
     print("--------------------Effort Check--------------------")
     print(f"Effort for each joint HW3: \n {tau}")
     print(f"Effort for each joint Robotic toolbox: \n {tau_rtb}")
     if np.linalg.norm(diff) < threshold:
+        # ถ้า Error น้อยกว่า Threshold จะถือว่า Error เป็น 0 ไปเลย
         diff = np.where(np.abs(diff) < threshold, 0.0, diff)
         print(f"Error: \n {diff}")
         print("Answer: CORRECT\n")
